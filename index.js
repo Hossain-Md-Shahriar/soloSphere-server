@@ -101,8 +101,10 @@ async function run() {
         email: bidData.email,
         jobId: bidData.jobId,
       });
-      if(alreadyApplied) {
-        return res.status(400).send("You have already placed a bid on this job");
+      if (alreadyApplied) {
+        return res
+          .status(400)
+          .send("You have already placed a bid on this job");
       }
 
       const result = await bidsCollection.insertOne(bidData);
@@ -177,6 +179,25 @@ async function run() {
       };
       const result = await bidsCollection.updateOne(query, updateDoc);
       res.send(result);
+    });
+
+    // get all jobs data from db for pagination
+    app.get("/all-jobs", async (req, res) => {
+      const size = parseInt(req.query.size);
+      const page = parseInt(req.query.page) - 1;
+      console.log(size, page);
+      const result = await jobsCollection
+        .find()
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      res.send(result);
+    });
+
+    // get all jobs data count from db
+    app.get("/jobs-count", async (req, res) => {
+      const count = await jobsCollection.countDocuments();
+      res.send({ count });
     });
 
     // Send a ping to confirm a successful connection
