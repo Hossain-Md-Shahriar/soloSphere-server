@@ -9,7 +9,11 @@ const port = process.env.PORT || 9000;
 const app = express();
 
 const corsOptions = {
-  origin: ["http://localhost:5173", "http://localhost:5174"],
+  origin: [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "https://solosphere-a2a0e.web.app",
+  ],
   credentials: true,
   optionSuccessStatus: 200,
 };
@@ -108,6 +112,17 @@ async function run() {
       }
 
       const result = await bidsCollection.insertOne(bidData);
+
+      // update bid count in jobs collection
+      const updateDoc = {
+        $inc: { bid_count: 1 },
+      };
+      const jobQuery = { _id: new ObjectId(bidData.jobId) };
+      const updateBidCount = await jobsCollection.updateOne(
+        jobQuery,
+        updateDoc
+      );
+
       res.send(result);
     });
 
