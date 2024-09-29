@@ -185,9 +185,13 @@ async function run() {
     app.get("/all-jobs", async (req, res) => {
       const size = parseInt(req.query.size);
       const page = parseInt(req.query.page) - 1;
+      const filter = req.query.filter;
       console.log(size, page);
+
+      let query = {};
+      if(filter) query = { category: filter };
       const result = await jobsCollection
-        .find()
+        .find(query)
         .skip(page * size)
         .limit(size)
         .toArray();
@@ -196,7 +200,10 @@ async function run() {
 
     // get all jobs data count from db
     app.get("/jobs-count", async (req, res) => {
-      const count = await jobsCollection.countDocuments();
+      const filter = req.query.filter;
+      let query = {};
+      if(filter) query = { category: filter };
+      const count = await jobsCollection.countDocuments(query);
       res.send({ count });
     });
 
